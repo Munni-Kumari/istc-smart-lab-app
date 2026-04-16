@@ -5,17 +5,31 @@ export default function ProfileScreen() {
     <View
       style={{
         flex: 1,
+        backgroundColor: "#F5F7FA",
         padding: 20,
-        justifyContent: "center",
       }}
     >
-      <Text style={{ fontSize: 24 }}>
-        User Profile
-      </Text>
+      <View
+        style={{
+          backgroundColor: "white",
+          padding: 24,
+          borderRadius: 18,
+          elevation: 4,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 26,
+            fontWeight: "bold",
+          }}
+        >
+          Research Profile
+        </Text>
 
-      <Text style={{ marginTop: 10 }}>
-        Name: Student
-      </Text>
+        <Text style={{ marginTop: 16 }}>Name: Student</Text>
+        <Text style={{ marginTop: 10 }}>Department: CSIO</Text>
+        <Text style={{ marginTop: 10 }}>Project: ISTC Smart Lab</Text>
+      </View>
     </View>
   );
 }
