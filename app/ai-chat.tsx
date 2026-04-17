@@ -14,40 +14,21 @@ export default function AIChatScreen() {
   const [loading, setLoading] = useState(false);
 
   const sendMessage = async () => {
-    try {
-      setLoading(true);
+    if (!message.trim()) return;
 
-      const data = await api.askAI(message);
+    setLoading(true);
 
-      setReply(data.result || "No AI response received");
-    } catch (error) {
-      setReply("Error connecting to AI backend");
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+    const data = await api.askAI(message);
+
+    setReply(data?.result || "No response received");
+
+    setLoading(false);
   };
 
   return (
-    <ScrollView
-      style={{
-        flex: 1,
-        backgroundColor: "#F5F7FA",
-        padding: 20,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 24,
-          fontWeight: "bold",
-          marginBottom: 20,
-        }}
-      >
-        AI Assistant
-      </Text>
-
+    <ScrollView style={{ flex: 1, padding: 20 }}>
       <TextInput
-        placeholder="Ask AI about experiments..."
+        placeholder="Ask AI..."
         value={message}
         onChangeText={setMessage}
         style={{
@@ -64,10 +45,9 @@ export default function AIChatScreen() {
           backgroundColor: "#2563EB",
           padding: 15,
           borderRadius: 12,
-          alignItems: "center",
         }}
       >
-        <Text style={{ color: "white", fontWeight: "bold" }}>
+        <Text style={{ color: "white" }}>
           {loading ? "Loading..." : "Send"}
         </Text>
       </TouchableOpacity>

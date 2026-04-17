@@ -3,36 +3,36 @@ const BASE_URL = "http://192.168.221.66:3000";
 export const api = {
   getExperiments: async () => {
     try {
+      console.log("Fetching experiments...");
+
       const res = await fetch(`${BASE_URL}/api/experiments`);
+
       const data = await res.json();
 
-      console.log("Experiments API:", data);
+      console.log("Experiments API Response:", data);
 
-      return data;
+      // return only array
+      return data?.data || [];
     } catch (error) {
-      console.log("GET experiments error:", error);
-      throw error;
+      console.log("API ERROR:", error);
+      return [];
     }
   },
 
-  createExperiment: async (data: any) => {
+  createExperiment: async (payload: any) => {
     try {
       const res = await fetch(`${BASE_URL}/api/experiments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
-      const result = await res.json();
-
-      console.log("Create API:", result);
-
-      return result;
+      return await res.json();
     } catch (error) {
-      console.log("Create error:", error);
-      throw error;
+      console.log("Create API ERROR:", error);
+      return { error: true };
     }
   },
 
@@ -43,21 +43,13 @@ export const api = {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message,
-          experiment: {},
-          history: [],
-        }),
+        body: JSON.stringify({ message }),
       });
 
-      const data = await res.json();
-
-      console.log("AI API:", data);
-
-      return data;
+      return await res.json();
     } catch (error) {
-      console.log("AI error:", error);
-      throw error;
+      console.log("AI API ERROR:", error);
+      return { result: "Error connecting to AI backend" };
     }
   },
 };
