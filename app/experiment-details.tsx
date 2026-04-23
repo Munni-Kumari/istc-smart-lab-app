@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import MyLineChart from "../components/charts/LineChart";
 import { mqttService } from "../services/mqttService";
+import { api } from "../services/api";
 
 export default function ExperimentDetails() {
   const { id, name, description } = useLocalSearchParams();
 
   const [graphValues, setGraphValues] = useState<number[]>([]);
+  const [currentUnit, setCurrentUnit] = useState("");
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [deviceConnected, setDeviceConnected] = useState(false);
@@ -38,6 +40,7 @@ export default function ExperimentDetails() {
 
       setGraphValues(data.values);
       setDeviceConnected(data.deviceConnected);
+      if (data.unit) setCurrentUnit(data.unit);
     });
 
     return () => {
@@ -80,18 +83,7 @@ export default function ExperimentDetails() {
         history: chatHistory,
       };
 
-      const res = await fetch(
-        "http://192.168.221.66:3000/api/ai-chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const data = await res.json();
+      const data = await api.askAI(payload);
 
       setAiResponse(data.result);
 
@@ -121,11 +113,11 @@ export default function ExperimentDetails() {
             color: "white",
           }}
         >
-          {name}
+          {name || "Lab Experiment"}
         </Text>
 
         <Text style={{ color: "#9CA3AF", marginTop: 5 }}>
-          Experiment ID: {id}
+          Experiment ID: {id || "N/A"}
         </Text>
       </View>
 
@@ -230,25 +222,23 @@ export default function ExperimentDetails() {
         </View>
 
         {graphValues.length > 0 && deviceConnected ? (
-          <MyLineChart values={graphValues} />
+          <MyLineChart values={graphValues} unit={currentUnit} />
         ) : (
           <View style={{ padding: 20, alignItems: "center" }}>
-            <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+            <Text style={{ color: "#9CA3AF", fontSize: 14, textAlign: 'center' }}>
               {isFetching
-                ? "🔌 Waiting for ESP8266 device connection..."
+                ? `🔌 Searching for lab data at 192.168.221.66...\nEnsure your ESP8266 is publishing to 'smartlab/sensor/data'`
                 : "Data fetching stopped"}
             </Text>
 
-            <Text
-              style={{
-                color: "#6B7280",
-                fontSize: 12,
-                marginTop: 8,
-              }}
-            >
-              Connect your ESP8266 with ultrasonic sensor
-              to start plotting
-            </Text>
+            <View style={{ marginTop: 20, backgroundColor: '#1F2937', padding: 12, borderRadius: 10, width: '100%' }}>
+              <Text style={{ color: '#6B7280', fontSize: 11, marginBottom: 4 }}>DEBUG INFO</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 11 }}>● Server: http://192.168.221.66:3000</Text>
+              <Text style={{ color: deviceConnected ? '#10B981' : '#F59E0B', fontSize: 11 }}>
+                ● Device: {deviceConnected ? "CONNECTED" : "WAITING FOR DATA..."}
+              </Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 11 }}>● Buffer: {graphValues.length} points</Text>
+            </View>
           </View>
         )}
       </View>

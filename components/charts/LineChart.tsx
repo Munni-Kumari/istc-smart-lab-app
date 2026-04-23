@@ -6,14 +6,15 @@ const screenWidth = Dimensions.get("window").width;
 
 interface Props {
   values: number[];
+  unit?: string;
 }
 
-export default function MyLineChart({ values = [] }: Props) {
+export default function MyLineChart({ values = [], unit = "" }: Props) {
   if (!Array.isArray(values) || values.length === 0) {
     return (
       <View style={{ padding: 20 }}>
         <Text style={{ color: "white" }}>
-          Waiting for distance data...
+          Waiting for sensor data...
         </Text>
       </View>
     );
@@ -32,13 +33,15 @@ export default function MyLineChart({ values = [] }: Props) {
     return `${i + 1}`;
   });
 
+  const displayUnit = unit || "";
+
   return (
     <View style={{ marginTop: 20 }}>
-      {/* Current Distance Display */}
+      {/* Current Value Display */}
       <View style={{ marginBottom: 15 }}>
-        <Text style={{ color: "#9CA3AF", fontSize: 12 }}>Current Distance</Text>
+        <Text style={{ color: "#9CA3AF", fontSize: 12 }}>Current Reading</Text>
         <Text style={{ color: "#10B981", fontSize: 28, fontWeight: "bold" }}>
-          {values[values.length - 1].toFixed(1)} cm
+          {values[values.length - 1].toFixed(1)}{displayUnit}
         </Text>
       </View>
 
@@ -53,7 +56,7 @@ export default function MyLineChart({ values = [] }: Props) {
         }}
         width={screenWidth - 60}
         height={200}
-        yAxisSuffix=" cm"
+        yAxisSuffix={displayUnit}
         yAxisInterval={1}
         chartConfig={{
           backgroundGradientFrom: "#111827",
@@ -84,19 +87,19 @@ export default function MyLineChart({ values = [] }: Props) {
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
         <View>
           <Text style={{ color: "#6B7280", fontSize: 10 }}>MIN</Text>
-          <Text style={{ color: "white", fontSize: 12 }}>{minVal.toFixed(1)} cm</Text>
+          <Text style={{ color: "white", fontSize: 12 }}>{minVal.toFixed(1)}{displayUnit}</Text>
         </View>
         <View>
           <Text style={{ color: "#6B7280", fontSize: 10 }}>MAX</Text>
-          <Text style={{ color: "white", fontSize: 12 }}>{maxVal.toFixed(1)} cm</Text>
+          <Text style={{ color: "white", fontSize: 12 }}>{maxVal.toFixed(1)}{displayUnit}</Text>
         </View>
         <View>
           <Text style={{ color: "#6B7280", fontSize: 10 }}>AVG</Text>
           <Text style={{ color: "white", fontSize: 12 }}>
-            {(values.reduce((a, b) => a + b, 0) / values.length).toFixed(1)} cm
+            {(values.reduce((a, b) => a + b, 0) / values.length).toFixed(1)}{displayUnit}
           </Text>
         </View>
       </View>
     </View>
   );
-}
+}

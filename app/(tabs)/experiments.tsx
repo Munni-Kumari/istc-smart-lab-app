@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../services/api";
 
 export default function ExperimentsScreen() {
@@ -16,15 +18,15 @@ export default function ExperimentsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadExperiments();
+  };
+
   const loadExperiments = async () => {
     try {
       setError("");
-      console.log("Fetching experiments...");
-
       const data = await api.getExperiments();
-
-      console.log("Experiments API Response:", data);
-
       if (Array.isArray(data)) {
         setExperiments(data);
       } else {
@@ -32,7 +34,6 @@ export default function ExperimentsScreen() {
         setError("Invalid data format from backend");
       }
     } catch (err) {
-      console.log("Experiments fetch error:", err);
       setError("Failed to load experiments");
       setExperiments([]);
     } finally {
@@ -41,14 +42,12 @@ export default function ExperimentsScreen() {
     }
   };
 
-  useEffect(() => {
-    loadExperiments();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadExperiments();
+    }, [])
+  );
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    loadExperiments();
-  };
 
   if (loading) {
     return (
@@ -74,22 +73,38 @@ export default function ExperimentsScreen() {
         padding: 16,
       }}
     >
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: "bold",
-          marginBottom: 16,
-        }}
-      >
-        Experiments
-      </Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "bold",
+          }}
+        >
+          Experiments
+        </Text>
+        <TouchableOpacity 
+          onPress={() => router.push("/create-experiment")}
+          style={{ backgroundColor: '#2563EB', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Ionicons name="add" size={30} color="white" />
+        </TouchableOpacity>
+      </View>
 
       {error ? (
         <Text style={{ color: "red", marginBottom: 10 }}>{error}</Text>
       ) : null}
 
       {experiments.length === 0 ? (
-        <Text>No experiments found</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+          <Ionicons name="flask-outline" size={64} color="#CBD5E1" />
+          <Text style={{ fontSize: 18, color: '#64748B', marginTop: 16 }}>No experiments found</Text>
+          <TouchableOpacity 
+            onPress={loadExperiments}
+            style={{ marginTop: 20, backgroundColor: '#2563EB', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 }}
+          >
+            <Text style={{ color: 'white', fontWeight: 'bold' }}>Retry Fetch</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
           data={experiments}
@@ -145,4 +160,4 @@ export default function ExperimentsScreen() {
       )}
     </View>
   );
-}
+}
